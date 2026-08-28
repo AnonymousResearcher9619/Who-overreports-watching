@@ -243,7 +243,7 @@ latex_rows <- c(
   paste("Total N & & &",
         paste(row_n, collapse = " & "), "\\\\"),
   "\\midrule",
-  paste("5 overreporters among validated non-watchers & 5=2/(2+4); in \\% & &",
+  paste("5 overreporters among passive non-watchers & 5=2/(2+4); in \\% & &",
         paste(fmt(row5_overrep_among_nonwatchers), collapse = " & "), "\\\\"),
   paste("6 overreporters among self-report watchers & 6=2/(1+2); in \\% & &",
         paste(fmt(row6_overrep_among_selfreport), collapse = " & "), "\\\\")

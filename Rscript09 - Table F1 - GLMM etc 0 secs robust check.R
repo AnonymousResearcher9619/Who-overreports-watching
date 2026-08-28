@@ -13,7 +13,7 @@
 # script without overwriting its objects.
 #
 # Two models are estimated:
-#   Model A ("Validated non-watchers"):
+#   Model A ("Passive non-watchers"):
 #       overreporters (misreport_4k_0sec == 1) vs. validated non-watchers
 #       (misreport_4k_0sec == 3)
 #   Model B ("Self-reported watchers"):
@@ -254,7 +254,7 @@ ame_list_A_0sec <- lapply(names(var_specs), function(v) {
   cat("  ", v, "...")
   res <- ame_one_var_0sec(
     m1_mixed_0sec, v, var_specs[[v]],
-    "Model A - Overreporting among validated nonwatchers (0sec)"
+    "Model A - Overreporting among passive non-watchers (0sec)"
   )
   cat(if (!is.null(res)) " OK\n" else " FAILED\n")
   res
@@ -342,7 +342,7 @@ if (length(unmapped_0sec) == 0) {
 
 # Split back into per-model tibbles carrying the mapped term_label, for
 # use both by the plot and by the LaTeX table builder below.
-ame_m1_mixed_0sec <- ame_mixed_all_0sec |> filter(model == "Model A - Overreporting among validated nonwatchers (0sec)")
+ame_m1_mixed_0sec <- ame_mixed_all_0sec |> filter(model == "Model A - Overreporting among passive non-watchers (0sec)")
 ame_m2_mixed_0sec <- ame_mixed_all_0sec |> filter(model == "Model B - Overreporting among self-reported watchers (0sec)")
 
 # =========================================================================
@@ -380,11 +380,11 @@ if (nrow(na_rows_0sec) > 0) {
 }
 
 model_colors_0sec <- c(
-  "Model A - Overreporting among validated nonwatchers (0sec)" = "#1b6ca8",
+  "Model A - Overreporting among passive non-watchers (0sec)" = "#1b6ca8",
   "Model B - Overreporting among self-reported watchers (0sec)" = "#c0392b"
 )
 model_shapes_0sec <- c(
-  "Model A - Overreporting among validated nonwatchers (0sec)" = 16,
+  "Model A - Overreporting among passive non-watchers (0sec)" = 16,
   "Model B - Overreporting among self-reported watchers (0sec)" = 17
 )
 
@@ -532,7 +532,7 @@ latex_table_0sec <- c(
   "\\begin{tabular}{lcc}",
   "\\toprule",
   "&",
-  "Validated non-watchers &",
+  "Passive non-watchers &",
   "Self-reported watchers \\\\",
   "\\midrule",
   "",
@@ -616,7 +616,7 @@ ggsave("calibration_ModelB_0sec_pooled.png", calib_B_0sec, width = 6, height = 5
 
 # ---- 10e. Random-effects variance summary (for appendix) ----
 re_summary_0sec <- tibble::tibble(
-  Model = c("A (validated nonwatchers, 0sec)", "B (self-report watchers, 0sec)"),
+  Model = c("A (passive non-watchers, 0sec)", "B (self-report watchers, 0sec)"),
   `Var(intercept)` = c(var_u_A_0sec, var_u_B_0sec),
   `SD(intercept)`  = c(sqrt(var_u_A_0sec), sqrt(var_u_B_0sec)),
   ICC              = c(icc_A_0sec, icc_B_0sec)

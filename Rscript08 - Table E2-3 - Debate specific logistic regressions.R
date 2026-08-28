@@ -3,7 +3,7 @@
 # Overreporting, estimated separately for each of the six debates,
 # weighted by 'weight', against two alternative reference groups:
 #
-#   Model A ("validated non-watchers"): overreporters (misreport_4k == 1)
+#   Model A ("passive non-watchers"): overreporters (misreport_4k == 1)
 #     vs. validated non-watchers (misreport_4k == 3)
 #   Model B ("self-reported watchers"): overreporters (misreport_4k == 1)
 #     vs. validated watchers (misreport_4k == 2)
@@ -435,7 +435,7 @@ build_latex_table <- function(debate_results, caption, label, tex_note_extra, fi
 
 build_latex_table(
   debate_results_A,
-  caption = "Overreporting among validated non-watchers -- debate specific logistic regressions (weighted)",
+  caption = "Overreporting among passive non-watchers -- debate specific logistic regressions (weighted)",
   label   = "tab:robust_nonwatchers_weighted",
   tex_note_extra = paste0(
     "Straightlining in the 2021-CT debate is excluded from this model as well; ",

@@ -8,7 +8,7 @@
 # in the same session as the main-specification script (and the other robustness
 # checks) without overwriting their objects.
 #
-#   Model A ("Validated non-watchers"):
+#   Model A ("Passive non-watchers"):
 #       overreporters (misreport_4k == 1) vs. validated non-watchers
 #       (misreport_4k == 3), excl. total_tv == 0.
 #   Model B ("Self-reported watchers"):
@@ -236,7 +236,7 @@ ame_list_A_exclTV0 <- lapply(names(var_specs), function(v) {
   cat("  ", v, "...")
   res <- ame_one_var_exclTV0(
     m1_mixed_exclTV0, v, var_specs[[v]],
-    "Model A - Overreporting among validated nonwatchers (excl. TV non-watchers)"
+    "Model A - Overreporting among passive non-watchers (excl. TV non-watchers)"
   )
   cat(if (!is.null(res)) " OK\n" else " FAILED\n")
   res
@@ -335,7 +335,7 @@ if (length(unmapped_exclTV0) == 0) {
   print(unmapped_exclTV0)
 }
 
-ame_m1_mixed_exclTV0 <- ame_mixed_all_exclTV0 |> filter(model == "Model A - Overreporting among validated nonwatchers (excl. TV non-watchers)")
+ame_m1_mixed_exclTV0 <- ame_mixed_all_exclTV0 |> filter(model == "Model A - Overreporting among passive non-watchers (excl. TV non-watchers)")
 ame_m2_mixed_exclTV0 <- ame_mixed_all_exclTV0 |> filter(model == "Model B - Overreporting among self-reported watchers (excl. TV non-watchers)")
 
 # =========================================================================
@@ -371,11 +371,11 @@ if (nrow(na_rows_exclTV0) > 0) {
 }
 
 model_colors_exclTV0 <- c(
-  "Model A - Overreporting among validated nonwatchers (excl. TV non-watchers)" = "#1b6ca8",
+  "Model A - Overreporting among passive non-watchers (excl. TV non-watchers)" = "#1b6ca8",
   "Model B - Overreporting among self-reported watchers (excl. TV non-watchers)" = "#c0392b"
 )
 model_shapes_exclTV0 <- c(
-  "Model A - Overreporting among validated nonwatchers (excl. TV non-watchers)" = 16,
+  "Model A - Overreporting among passive non-watchers (excl. TV non-watchers)" = 16,
   "Model B - Overreporting among self-reported watchers (excl. TV non-watchers)" = 17
 )
 
@@ -515,7 +515,7 @@ latex_table_exclTV0 <- c(
   "\\begin{tabular}{lcc}",
   "\\toprule",
   "&",
-  "Validated non-watchers &",
+  "Passive non-watchers &",
   "Self-reported watchers \\\\",
   "\\midrule",
   "",
@@ -594,7 +594,7 @@ ggsave("calibration_ModelA_exclTV0_pooled.png", calib_A_exclTV0, width = 6, heig
 ggsave("calibration_ModelB_exclTV0_pooled.png", calib_B_exclTV0, width = 6, height = 5, dpi = 300)
 
 re_summary_exclTV0 <- tibble::tibble(
-  Model = c("A (validated nonwatchers, excl. TV non-watchers)", "B (self-report watchers, excl. TV non-watchers)"),
+  Model = c("A (passive non-watchers, excl. TV non-watchers)", "B (self-report watchers, excl. TV non-watchers)"),
   `Var(intercept)` = c(var_u_A_exclTV0, var_u_B_exclTV0),
   `SD(intercept)`  = c(sqrt(var_u_A_exclTV0), sqrt(var_u_B_exclTV0)),
   ICC              = c(icc_A_exclTV0, icc_B_exclTV0)

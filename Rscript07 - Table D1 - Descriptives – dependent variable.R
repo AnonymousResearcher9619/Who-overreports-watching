@@ -102,7 +102,7 @@ latex_body <- c(
   ),
   "\\midrule",
   paste0(
-    "5 overreporters among validated non-watchers & ",
+    "5 overreporters among passive non-watchers & ",
     "5=2/(2+4); in \\% & & ",
     fmt(row5_overrep_among_nonwatchers),
     " \\\\"

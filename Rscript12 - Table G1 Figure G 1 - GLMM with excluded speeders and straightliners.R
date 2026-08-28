@@ -5,17 +5,31 @@
 # excludes speeders (speeding == "x < 2.decile") and straightliners
 # (straightlining == 1).
 #
-#   Model A: Overreporting among validated nonwatchers (full sample)
+#   Model A: Overreporting among passive non-watchers (full sample)
 #   Model B: Overreporting among self-reported watchers (full sample)
-#   Model C: Overreporting among validated nonwatchers (excl. speeders &
+#   Model C: Overreporting among passive non-watchers (excl. speeders &
 #             straightliners)
 #   Model D: Overreporting among self-reported watchers (excl. speeders &
 #             straightliners)
 #
+# LABEL HANDLING: the four model labels (label_A..label_D, defined in
+# Section 0 below) are the SINGLE SOURCE OF TRUTH for how each model is
+# identified throughout this script - when the AME rows are created,
+# and again when they are colored/shaped in the plot. Retyping the same
+# string in multiple places is exactly how a plotted model can silently
+# lose its legend entry/color/shape (an invisible character difference -
+# e.g. a typographic dash "-" vs "--", a double space, a stray character
+# from copy-paste - makes scale_color_manual()/scale_shape_manual() fail
+# to match, and ggplot silently drops that model's points rather than
+# erroring). Defining the labels once and reusing the variables
+# everywhere makes that entire class of bug impossible.
+#
 # This script assumes Models A and B (m1_mixed, m2_mixed) and their AME
 # results (ame_m1_mixed, ame_m2_mixed) already exist in the environment,
-# e.g. from running the main-specification script first (Rscript04).
-
+# e.g. from running the main-specification script first (Rscript04). If
+# they don't, Section 0 re-estimates them on the full sample so this
+# script can also be run standalone - using the same label_A/label_B
+# constants, so labels always match regardless of which path is taken.
 # =========================================================================
 
 library(glmmTMB)
@@ -29,6 +43,91 @@ library(pROC)
 library(tibble)
 library(purrr)
 
+# =========================================================================
+# 0. MODEL LABELS (single source of truth)
+# =========================================================================
+
+label_A <- "Model A - Overreporting among passive non-watchers"
+label_B <- "Model B - Overreporting among self-reported watchers"
+label_C <- "Model C - Passive non-watchers (excl. speeders & straightliners)"
+label_D <- "Model D - Self-reported watchers (excl. speeders & straightliners)"
+
+need_ab <- !all(c("m1_mixed", "m2_mixed", "ame_m1_mixed", "ame_m2_mixed") %in% ls())
+
+if (need_ab) {
+  
+  message("Models A/B not found in environment - estimating them now.")
+  
+  panel_bin_A <- data_pooled |>
+    filter(misreport_4k %in% c(1, 3)) |>
+    mutate(
+      misreport_bin  = ifelse(misreport_4k == 1, 1, 0),
+      party_id_01    = factor(party_id_01),
+      edu            = factor(edu),
+      sex            = factor(sex),
+      speeding       = factor(speeding),
+      debate         = factor(debate),
+      duty           = factor(duty),
+      polint         = factor(polint),
+      straightlining = factor(straightlining),
+      total_tv       = as.numeric(total_tv)
+    )
+  
+  panel_bin_B <- data_pooled |>
+    filter(misreport_4k %in% c(1, 2)) |>
+    mutate(
+      misreport_bin  = ifelse(misreport_4k == 1, 1, 0),
+      party_id_01    = factor(party_id_01),
+      edu            = factor(edu),
+      sex            = factor(sex),
+      speeding       = factor(speeding),
+      debate         = factor(debate),
+      duty           = factor(duty),
+      polint         = factor(polint),
+      straightlining = factor(straightlining),
+      total_tv       = as.numeric(total_tv)
+    )
+  
+  m1_mixed <- glmmTMB(
+    misreport_bin ~ party_id_01 + duty + polint + straightlining +
+      speeding + age + edu + sex + total_tv + debate +
+      (1 | RADIOMETER_ID2),
+    data = panel_bin_A, family = binomial(link = "logit")
+  )
+  
+  m2_mixed <- glmmTMB(
+    misreport_bin ~ party_id_01 + duty + polint + straightlining +
+      speeding + age + edu + sex + total_tv + debate +
+      (1 | RADIOMETER_ID2),
+    data = panel_bin_B, family = binomial(link = "logit")
+  )
+  
+  ame_one_var_ab <- function(model, var, spec, model_label) {
+    tryCatch({
+      avg_comparisons(
+        model, type = "response", vcov = vcov(model)$cond,
+        variables = setNames(list(spec), var)
+      ) |> as_tibble() |> mutate(model = model_label)
+    }, error = function(e) {
+      message("  ERROR for '", var, "': ", conditionMessage(e))
+      NULL
+    })
+  }
+  
+  var_specs_ab <- list(
+    party_id_01 = "reference", duty = "reference", polint = "reference",
+    straightlining = "reference", speeding = "reference",
+    edu = "reference", sex = "reference", debate = "reference",
+    age = 1, total_tv = 1
+  )
+  
+  ame_m1_mixed <- bind_rows(Filter(Negate(is.null), lapply(
+    names(var_specs_ab), function(v) ame_one_var_ab(m1_mixed, v, var_specs_ab[[v]], label_A)
+  )))
+  ame_m2_mixed <- bind_rows(Filter(Negate(is.null), lapply(
+    names(var_specs_ab), function(v) ame_one_var_ab(m2_mixed, v, var_specs_ab[[v]], label_B)
+  )))
+}
 
 # =========================================================================
 # 1. DATA PREPARATION: RESTRICTED SAMPLE (EXCL. SPEEDERS & STRAIGHTLINERS)
@@ -202,8 +301,7 @@ cat("\n=== AME Model C ===\n")
 ame_m3 <- bind_rows(Filter(Negate(is.null), lapply(
   names(var_specs_excl), function(v) {
     cat("  ", v, "...")
-    res <- ame_one_var(m3_mixed, v, var_specs_excl[[v]],
-                       "Model C - Validated nonwatchers (excl. speeders & straightliners)")
+    res <- ame_one_var(m3_mixed, v, var_specs_excl[[v]], label_C)
     cat(if (!is.null(res)) " OK\n" else " FAILED\n"); res
   }
 )))
@@ -212,8 +310,7 @@ cat("\n=== AME Model D ===\n")
 ame_m4 <- bind_rows(Filter(Negate(is.null), lapply(
   names(var_specs_excl), function(v) {
     cat("  ", v, "...")
-    res <- ame_one_var(m4_mixed, v, var_specs_excl[[v]],
-                       "Model D - Self-reported watchers (excl. speeders & straightliners)")
+    res <- ame_one_var(m4_mixed, v, var_specs_excl[[v]], label_D)
     cat(if (!is.null(res)) " OK\n" else " FAILED\n"); res
   }
 )))
@@ -251,7 +348,7 @@ dict_keys <- norm_key(names(label_dict))
 if (anyDuplicated(dict_keys)) {
   dup_keys <- unique(dict_keys[duplicated(dict_keys)])
   stop(
-    "Collision in label_dict after norm.. : ",
+    "Collision in label_dict after norm_key(): ",
     paste(dup_keys, collapse = ", ")
   )
 }
@@ -285,6 +382,23 @@ unmapped <- ame_all_4 |>
   pull(term_label_raw) |> unique() |> sort()
 if (length(unmapped) == 0) cat("All terms mapped successfully.\n") else print(unmapped)
 
+# Safety check: every model label actually present in ame_all_4$model
+# should be one of label_A..label_D. If not, something upstream (e.g. a
+# stale ame_m1_mixed/ame_m2_mixed loaded from an old run) still carries
+# an outdated label string, and would silently lose its color/shape in
+# the plot below - catch that here instead.
+model_values_present <- unique(ame_all_4$model)
+expected_labels <- c(label_A, label_B, label_C, label_D)
+stray_labels <- setdiff(model_values_present, expected_labels)
+if (length(stray_labels) > 0) {
+  cat("\n=== WARNING: unexpected model label(s) found in ame_all_4$model ===\n")
+  print(stray_labels)
+  cat("These will not get a color/shape/legend entry in the plot below.\n",
+      "Likely cause: ame_m1_mixed/ame_m2_mixed were created by an earlier\n",
+      "run with a different label - re-run Section 0 (or the main-\n",
+      "specification script) to regenerate them with label_A/label_B.\n")
+}
+
 term_order <- c(
   "PID (somewhat close or very close)",
   "Political interest (just a little)",
@@ -308,10 +422,10 @@ ame_plot_df <- ame_all_4 |>
   mutate(
     term_label  = factor(term_label, levels = term_order),
     model_group = case_when(
-      grepl("Model A", model) ~ "A",
-      grepl("Model B", model) ~ "B",
-      grepl("Model C", model) ~ "C",
-      grepl("Model D", model) ~ "D"
+      model == label_A ~ "A",
+      model == label_B ~ "B",
+      model == label_C ~ "C",
+      model == label_D ~ "D"
     )
   )
 
@@ -325,30 +439,33 @@ ame_plot_df <- ame_all_4 |>
 # separate full-sample (A, B: solid) from restricted-sample (C, D:
 # hollow) specifications. Point-estimate labels are rounded to 2 decimal
 # places.
+#
+# All keys below are the label_A..label_D variables (not retyped
+# strings), so they are guaranteed to match whatever ame_all_4$model
+# actually contains - see the Section 0/7 comments on why this matters.
 # =========================================================================
 
-model_labels_map <- c(
-  "Model A - Overreporting among validated nonwatchers"                = "A: Validated nonwatchers (full sample)",
-  "Model B - Overreporting among self-reported watchers"               = "B: Self-reported watchers (full sample)",
-  "Model C - Validated nonwatchers (excl. speeders & straightliners)"  = "C: Validated nonwatchers (excl. speeders & straightliners)",
-  "Model D - Self-reported watchers (excl. speeders & straightliners)" = "D: Self-reported watchers (excl. speeders & straightliners)"
+model_labels_map <- setNames(
+  c(
+    "A: Passive non-watchers (full sample)",
+    "B: Self-reported watchers (full sample)",
+    "C: Passive non-watchers (excl. speeders & straightliners)",
+    "D: Self-reported watchers (excl. speeders & straightliners)"
+  ),
+  c(label_A, label_B, label_C, label_D)
 )
 
-model_colors <- c(
-  "Model A - Overreporting among validated nonwatchers"                = "#1b6ca8",
-  "Model B - Overreporting among self-reported watchers"               = "#c0392b",
-  "Model C - Validated nonwatchers (excl. speeders & straightliners)"  = "#1b6ca8",
-  "Model D - Self-reported watchers (excl. speeders & straightliners)" = "#c0392b"
+model_colors <- setNames(
+  c("#1b6ca8", "#c0392b", "#1b6ca8", "#c0392b"),
+  c(label_A, label_B, label_C, label_D)
 )
 
 # Distinct shape per model (not just per sample), so B&W printouts still
 # distinguish all four: filled circle (A), filled triangle (B), hollow
 # square (C), hollow diamond (D).
-model_shapes <- c(
-  "Model A - Overreporting among validated nonwatchers"                = 16, # filled circle
-  "Model B - Overreporting among self-reported watchers"               = 17, # filled triangle
-  "Model C - Validated nonwatchers (excl. speeders & straightliners)"  = 0,  # hollow square
-  "Model D - Self-reported watchers (excl. speeders & straightliners)" = 5   # hollow diamond
+model_shapes <- setNames(
+  c(16, 17, 0, 5),  # filled circle, filled triangle, hollow square, hollow diamond
+  c(label_A, label_B, label_C, label_D)
 )
 
 plot_ame_4 <- ggplot(
@@ -415,10 +532,10 @@ fmt_ame_cell <- function(df, label, digits = 2) {
   paste0(est, "$", stars, "$ [", lo, ", ", hi, "]")
 }
 
-ame_m1_lbl <- ame_all_4 |> filter(grepl("Model A", model))
-ame_m2_lbl <- ame_all_4 |> filter(grepl("Model B", model))
-ame_m3_lbl <- ame_all_4 |> filter(grepl("Model C", model))
-ame_m4_lbl <- ame_all_4 |> filter(grepl("Model D", model))
+ame_m1_lbl <- ame_all_4 |> filter(model == label_A)
+ame_m2_lbl <- ame_all_4 |> filter(model == label_B)
+ame_m3_lbl <- ame_all_4 |> filter(model == label_C)
+ame_m4_lbl <- ame_all_4 |> filter(model == label_D)
 
 row_defs <- tibble::tibble(
   key   = term_order,
@@ -496,9 +613,9 @@ latex_table_4 <- c(
   "\\cmidrule(lr){2-3}\\cmidrule(lr){4-5}",
   "",
   "&",
-  "Validated non-watchers &",
+  "Passive non-watchers &",
   "Self-reported watchers &",
-  "Validated non-watchers &",
+  "Passive non-watchers &",
   "Self-reported watchers \\\\",
   "",
   "&",
@@ -555,10 +672,10 @@ ame_export_4 <- ame_plot_df |>
 
 write_xlsx(
   list(
-    Model_A  = filter(ame_export_4, grepl("Model A", model)),
-    Model_B  = filter(ame_export_4, grepl("Model B", model)),
-    Model_C  = filter(ame_export_4, grepl("Model C", model)),
-    Model_D  = filter(ame_export_4, grepl("Model D", model)),
+    Model_A  = filter(ame_export_4, model == label_A),
+    Model_B  = filter(ame_export_4, model == label_B),
+    Model_C  = filter(ame_export_4, model == label_C),
+    Model_D  = filter(ame_export_4, model == label_D),
     Combined = ame_export_4
   ),
   "AME_4models_results.xlsx"
@@ -617,5 +734,6 @@ writexl::write_xlsx(re_summary_4, "random_effects_summary_4models.xlsx")
 #   - AME_4models_results.xlsx          (AME estimates, all 4 models)
 #   - calibration_ModelC/D.png          (calibration diagnostic plots)
 #   - random_effects_summary_4models.xlsx
-#   - console output: convergence, ICC, LRT, AUC, VIF, R2, overdispersion
+#   - console output: convergence, ICC, LRT, AUC, VIF, R2, overdispersion,
+#     and a check that every model label present matches label_A..label_D
 # =========================================================================

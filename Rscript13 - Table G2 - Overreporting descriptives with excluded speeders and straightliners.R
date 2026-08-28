@@ -170,7 +170,7 @@ latex_table <- c(
   "\\midrule",
   build_row("N", "n", is_n = TRUE),
   "\\midrule",
-  build_row("Overreporters among validated non-watchers (\\%)", "overrep_among_nonwatchers"),
+  build_row("Overreporters among passive non-watchers (\\%)", "overrep_among_nonwatchers"),
   build_row("Overreporters among self-report watchers (\\%)",   "overrep_among_selfreport"),
   "\\bottomrule",
   "\\end{tabular}",

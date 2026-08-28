@@ -15,7 +15,7 @@
 # To create the misreport_4k variable, run the Rscript03.
 #
 # Two models are estimated:
-#   Model A ("Validated non-watchers"):
+#   Model A ("Passive non-watchers"):
 #       overreporters (misreport_4k_10pct == 1) vs. validated non-watchers
 #       (misreport_4k_10pct == 3)
 #       overreporting.
@@ -256,7 +256,7 @@ ame_list_A_10pct <- lapply(names(var_specs), function(v) {
   cat("  ", v, "...")
   res <- ame_one_var_10pct(
     m1_mixed_10pct, v, var_specs[[v]],
-    "Model A - Overreporting among validated nonwatchers (10pct)"
+    "Model A - Overreporting among passive non-watchers (10pct)"
   )
   cat(if (!is.null(res)) " OK\n" else " FAILED\n")
   res
@@ -371,7 +371,7 @@ if (length(unmapped_10pct) == 0) {
 
 # Split back into per-model tibbles carrying the mapped term_label, for
 # use both by the plot and by the LaTeX table builder below.
-ame_m1_mixed_10pct <- ame_mixed_all_10pct |> filter(model == "Model A - Overreporting among validated nonwatchers (10pct)")
+ame_m1_mixed_10pct <- ame_mixed_all_10pct |> filter(model == "Model A - Overreporting among passive non-watchers (10pct)")
 ame_m2_mixed_10pct <- ame_mixed_all_10pct |> filter(model == "Model B - Overreporting among self-reported watchers (10pct)")
 
 # =========================================================================
@@ -409,11 +409,11 @@ if (nrow(na_rows_10pct) > 0) {
 }
 
 model_colors_10pct <- c(
-  "Model A - Overreporting among validated nonwatchers (10pct)" = "#1b6ca8",
+  "Model A - Overreporting among passive non-watchers (10pct)" = "#1b6ca8",
   "Model B - Overreporting among self-reported watchers (10pct)" = "#c0392b"
 )
 model_shapes_10pct <- c(
-  "Model A - Overreporting among validated nonwatchers (10pct)" = 16,
+  "Model A - Overreporting among passive non-watchers (10pct)" = 16,
   "Model B - Overreporting among self-reported watchers (10pct)" = 17
 )
 
@@ -561,7 +561,7 @@ latex_table_10pct <- c(
   "\\begin{tabular}{lcc}",
   "\\toprule",
   "&",
-  "Validated non-watchers &",
+  "Passive non-watchers &",
   "Self-reported watchers \\\\",
   "\\midrule",
   "",
@@ -645,7 +645,7 @@ ggsave("calibration_ModelB_10pct_pooled.png", calib_B_10pct, width = 6, height =
 
 # ---- 10e. Random-effects variance summary (for appendix) ----
 re_summary_10pct <- tibble::tibble(
-  Model = c("A (validated nonwatchers, 10pct)", "B (self-report watchers, 10pct)"),
+  Model = c("A (passive non-watchers, 10pct)", "B (self-report watchers, 10pct)"),
   `Var(intercept)` = c(var_u_A_10pct, var_u_B_10pct),
   `SD(intercept)`  = c(sqrt(var_u_A_10pct), sqrt(var_u_B_10pct)),
   ICC              = c(icc_A_10pct, icc_B_10pct)

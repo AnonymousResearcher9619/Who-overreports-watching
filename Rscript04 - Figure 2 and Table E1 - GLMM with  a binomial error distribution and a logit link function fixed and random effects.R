@@ -5,7 +5,7 @@
 # (claiming to have watched at least part of the debate when the passive
 # measure shows under 3 minutes of exposure), each defined against a
 # different reference group:
-#   Model A ("Validated non-watchers"):
+#   Model A ("Passive non-watchers"):
 #       overreporters (misreport_4k == 1) vs. validated non-watchers
 #       (misreport_4k == 3)
 #   Model B ("Self-reported watchers"):
@@ -222,7 +222,7 @@ ame_list_A <- lapply(names(var_specs), function(v) {
   cat("  ", v, "...")
   res <- ame_one_var(
     m1_mixed, v, var_specs[[v]],
-    "Model A - Overreporting among validated nonwatchers"
+    "Model A - Overreporting among passive non-watchers"
   )
   cat(if (!is.null(res)) " OK\n" else " FAILED\n")
   res
@@ -312,7 +312,7 @@ if (length(unmapped) == 0) {
   print(unmapped)
 }
 
-ame_m1_mixed <- ame_mixed_all |> filter(model == "Model A - Overreporting among validated nonwatchers")
+ame_m1_mixed <- ame_mixed_all |> filter(model == "Model A - Overreporting among passive non-watchers")
 ame_m2_mixed <- ame_mixed_all |> filter(model == "Model B - Overreporting among self-reported watchers")
 
 # ---- 8. Coefficient plot -----------------------------------------------------
@@ -349,11 +349,11 @@ if (nrow(na_rows) > 0) {
 }
 
 model_colors <- c(
-  "Model A - Overreporting among validated nonwatchers" = "#1b6ca8",
+  "Model A - Overreporting among passive non-watchers" = "#1b6ca8",
   "Model B - Overreporting among self-reported watchers" = "#c0392b"
 )
 model_shapes <- c(
-  "Model A - Overreporting among validated nonwatchers" = 16,
+  "Model A - Overreporting among passive non-watchers" = 16,
   "Model B - Overreporting among self-reported watchers" = 17
 )
 
@@ -497,7 +497,7 @@ latex_table <- c(
   "\\begin{tabular}{lcc}",
   "\\toprule",
   "&",
-  "Validated non-watchers &",
+  "Passive non-watchers &",
   "Self-reported watchers \\\\",
   "\\midrule",
   "",
@@ -575,7 +575,7 @@ ggsave("calibration_ModelA_pooled.png", calib_A, width = 6, height = 5, dpi = 30
 ggsave("calibration_ModelB_pooled.png", calib_B, width = 6, height = 5, dpi = 300)
 
 re_summary <- tibble::tibble(
-  Model = c("A (validated nonwatchers)", "B (self-report watchers)"),
+  Model = c("A (passive non-watchers)", "B (self-report watchers)"),
   `Var(intercept)` = c(var_u_A, var_u_B),
   `SD(intercept)`  = c(sqrt(var_u_A), sqrt(var_u_B)),
   ICC              = c(icc_A, icc_B)
