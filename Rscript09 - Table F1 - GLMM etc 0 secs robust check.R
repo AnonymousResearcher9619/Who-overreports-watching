@@ -24,11 +24,11 @@
 # regressions (glmmTMB), with debate as a fixed effect, estimated on the
 # long-format panel (one row per respondent per debate).
 # 
-# IMPORTANT: Before running this script, the variable `misreport_4k` must
+# IMPORTANT: Before running this script, the variable `misreport_4k_0sec` must
 # already exist in the environment/data. It is created in the script
 # "Rscript03 - Table 3 - Transformations and overreporting desriptives".
 # Therefore, that script must be run first, or the prepared data containing
-# `misreport_4k` must otherwise be loaded into the current R session.
+# `misreport_4k_0sec` must otherwise be loaded into the current R session.
 # =========================================================================
 
 library(glmmTMB)
