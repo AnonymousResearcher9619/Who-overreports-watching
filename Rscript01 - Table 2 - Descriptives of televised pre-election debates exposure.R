@@ -21,8 +21,6 @@
 # respondent. Hence, svydesign(ids = ~1, ...) is appropriate here
 # (no clustering is needed).
 #
-# This differs from the modelling scripts, which pool observations
-# across debates and therefore cluster on respondent ID.
 # =========================================================================
 
 library(dplyr)
