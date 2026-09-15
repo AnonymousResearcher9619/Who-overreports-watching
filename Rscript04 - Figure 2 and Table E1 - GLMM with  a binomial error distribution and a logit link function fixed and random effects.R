@@ -169,8 +169,7 @@ print(AIC(m_no_re_B, m2_mixed))
 print(BIC(m_no_re_B, m2_mixed))
 
 # ---- 6. Predictive performance (AUC) -----------------------------------------
-# re.form = NA gives population-average (fixed-effects-only) predictions,
-# consistent with the AME below.
+# re.form = NA gives population-average (fixed-effects-only) predictions
 
 pred_A <- predict(m1_mixed, type = "response", re.form = NA)
 pred_B <- predict(m2_mixed, type = "response", re.form = NA)
