@@ -195,8 +195,7 @@ print(BIC(m_no_re_B_0sec, m2_mixed_0sec))
 # 6. PREDICTIVE PERFORMANCE (AUC)
 # =========================================================================
 # Predictions use re.form = NA (population-average / fixed-effects-only
-# predictions), consistent with the AME below being computed on the
-# response scale, marginalised over the random effect.
+# predictions)
 # =========================================================================
 
 pred_A_0sec <- predict(m1_mixed_0sec, type = "response", re.form = NA)
@@ -210,11 +209,6 @@ cat("AUC Model B:", auc_B_0sec, "\n")
 
 # =========================================================================
 # 7. AVERAGE MARGINAL EFFECTS (AME)
-# =========================================================================
-# avg_comparisons() from marginaleffects gives AME on the response
-# (probability) scale for both factor and continuous predictors, using
-# the model's own variance-covariance matrix (conditional component of
-# glmmTMB) for confidence intervals.
 # =========================================================================
 
 # ---- 7a. Helper: AME for a single predictor, with error handling ----
